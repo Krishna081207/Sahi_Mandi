@@ -11,6 +11,7 @@ import { FarmerDashboard } from './pages/FarmerDashboard';
 import { AuthModal } from './components/auth/AuthModal';
 import { PlatformDocs } from './pages/PlatformDocs';
 import { MandiMap } from './pages/MandiMap';
+import { SmartChatbot } from './components/SmartChatbot';
 
 export default function App() {
   const [activePage, setActivePage] = useState('home');
@@ -49,8 +50,12 @@ export default function App() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setIsAdminLoggedIn(false);
     setFarmerData(null);
     setActivePage('home');
+    
+    // Clear any stored session data if needed
+    // localStorage.removeItem('userData'); // Uncomment when using localStorage
   };
 
   const handleUserUpdate = (updatedUser: any) => {
@@ -71,6 +76,7 @@ export default function App() {
           <MandiDetails 
             mandiId={selectedMandiId} 
             onBack={() => setSelectedMandiId(null)} 
+            userLocation={farmerData}
           />
         </div>
       );
@@ -82,7 +88,7 @@ export default function App() {
         return <Home onNavigate={handleNavigate} onSearch={handleSearch} />;
       
       case 'mandis':
-        return <MandiDiscovery onMandiSelect={handleMandiSelect} initialSearch={searchQuery} />;
+        return <MandiDiscovery onMandiSelect={handleMandiSelect} initialSearch={searchQuery} userLocation={farmerData} />;
       
       case 'map':
         return <MandiMap onMandiSelect={handleMandiSelect} />;
@@ -111,7 +117,7 @@ export default function App() {
       case 'analyze':
         return isLoggedIn ? (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
-            <SmartAnalyzer onMandiSelect={handleMandiSelect} initialCropId={selectedCropId} />
+            <SmartAnalyzer onMandiSelect={handleMandiSelect} initialCropId={selectedCropId} userLocation={farmerData} />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -177,6 +183,16 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
       />
+
+      {/* Smart Chatbot - Available on all pages */}
+      {isLoggedIn && (
+        <SmartChatbot
+          userLocation={farmerData}
+          onNavigateToMandi={handleMandiSelect}
+          onNavigateToAnalyzer={handleNavigateToAnalyzer}
+          userName={farmerData?.name}
+        />
+      )}
     </div>
   );
 }
